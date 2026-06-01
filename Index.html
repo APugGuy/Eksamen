@@ -4,11 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eksamen skisse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="Styles.css">
 </head>
 <body>
     <header class="site-header">
-        <h1>Enkel side</h1>
+        <div class="header-inner">
+            <h1>Enkel side</h1>
+            <div class="header-actions">
+                <button id="loginOpenBtn" class="login-btn" type="button">Logg inn</button>
+                <div id="loginDropdown" class="dropdown" style="display: none;">
+                    <button id="loginDropdownButton" class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Dropdown button
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a id="changeUsernameBtn" class="dropdown-item" href="#">Bytt brukernavn</a></li>
+                        <li><a id="logoutBtnHeader" class="dropdown-item" href="#">Logg ut</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </header>
 
     <main class="site-main">
@@ -18,5 +33,52 @@
     <footer class="site-footer">
         <p>Footer</p>
     </footer>
+
+    <aside id="loginPanel" class="login-panel" aria-hidden="true">
+        <div class="panel-header">
+            <strong>Logg inn</strong>
+            <button id="loginCloseBtn" class="panel-close" type="button">Lukk</button>
+        </div>
+        <div class="panel-body">
+            <div id="loginLoggedOut">
+                <div class="login-tabs">
+                    <button class="login-tab-btn active" type="button" data-tab="login">Logg inn</button>
+                    <button class="login-tab-btn" type="button" data-tab="signup">Opprett konto</button>
+                </div>
+                <form id="loginForm">
+                    <label class="field-label" for="loginEmail">E-post</label>
+                    <input id="loginEmail" class="field-input" type="email" required />
+
+                    <label class="field-label" for="loginPassword">Passord</label>
+                    <input id="loginPassword" class="field-input" type="password" required />
+
+                    <button class="login-submit" type="submit">Logg inn</button>
+                    <div id="loginMsg" class="login-msg"></div>
+                </form>
+
+                <form id="signupForm" style="display: none;">
+                    <label class="field-label" for="signupUsername">Brukernavn</label>
+                    <input id="signupUsername" class="field-input" type="text" />
+
+                    <label class="field-label" for="signupEmail">E-post</label>
+                    <input id="signupEmail" class="field-input" type="email" required />
+
+                    <label class="field-label" for="signupPassword">Passord</label>
+                    <input id="signupPassword" class="field-input" type="password" required />
+
+                    <button class="login-submit" type="submit">Opprett konto</button>
+                    <div id="signupMsg" class="login-msg"></div>
+                </form>
+            </div>
+
+            <div id="loginLoggedIn" style="display: none;">
+                <p id="whoami" class="login-whoami"></p>
+                <button id="logoutBtn" class="login-submit" type="button">Logg ut</button>
+            </div>
+        </div>
+    </aside>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script type="module" src="Script.js"></script>
 </body>
 </html>
