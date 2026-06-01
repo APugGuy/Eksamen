@@ -29,29 +29,28 @@ const logoutBtn = document.getElementById("logoutBtn");
 let currentUser = null;
 let currentProfile = null;
 
-function openPanel() {
-	panel.classList.add("open");
-	panel.setAttribute("aria-hidden", "false");
+function setPanelOpen(isOpen) {
+	panel.classList.toggle("open", isOpen);
+	panel.setAttribute("aria-hidden", isOpen ? "false" : "true");
 }
 
-function closePanel() {
-	panel.classList.remove("open");
-	panel.setAttribute("aria-hidden", "true");
+function show(el, isVisible) {
+	el.style.display = isVisible ? "" : "none";
 }
 
 function updateUI() {
 	if (!currentUser) {
-		loggedOut.style.display = "";
-		loggedIn.style.display = "none";
-		openBtn.style.display = "";
-		loginDropdown.style.display = "none";
+		show(loggedOut, true);
+		show(loggedIn, false);
+		show(openBtn, true);
+		show(loginDropdown, false);
 		return;
 	}
 
-	loggedOut.style.display = "none";
-	loggedIn.style.display = "";
-	openBtn.style.display = "none";
-	loginDropdown.style.display = "";
+	show(loggedOut, false);
+	show(loggedIn, true);
+	show(openBtn, false);
+	show(loginDropdown, true);
 
 	const displayName = currentProfile?.username || currentUser.email;
 	whoami.textContent = "Innlogget som " + displayName;
@@ -81,8 +80,8 @@ async function refreshAuthUI() {
 	updateUI();
 }
 
-openBtn.addEventListener("click", openPanel);
-closeBtn.addEventListener("click", closePanel);
+openBtn.addEventListener("click", () => setPanelOpen(true));
+closeBtn.addEventListener("click", () => setPanelOpen(false));
 
 tabButtons.forEach((btn) => {
 	btn.addEventListener("click", () => {
@@ -120,7 +119,7 @@ loginForm.addEventListener("submit", async (event) => {
 
 	loginMsg.textContent = "Innlogget.";
 	await refreshAuthUI();
-	setTimeout(closePanel, 300);
+	setTimeout(() => setPanelOpen(false), 300);
 });
 
 async function handleLogout() {

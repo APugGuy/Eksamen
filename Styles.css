@@ -23,6 +23,7 @@ body {
 	padding: 16px;
 	background-color: #1f4e79;
 	color: #ffffff;
+    
 }
 
 .site-header h1,
@@ -48,13 +49,6 @@ body {
 	color: #ffffff;
 	border: 1px solid #ffffff;
 	padding: 6px 12px;
-	border-radius: 4px;
-	cursor: pointer;
-}
-
-.login-badge {
-	font-size: 12px;
-	color: #e6eef7;
 }
 
 .site-main {
@@ -99,8 +93,6 @@ body {
 	border: 1px solid #444444;
 	color: #222222;
 	padding: 4px 10px;
-	border-radius: 4px;
-	cursor: pointer;
 }
 
 .panel-body {
@@ -118,8 +110,6 @@ body {
 	background-color: #ffffff;
 	color: #222222;
 	padding: 6px 10px;
-	border-radius: 4px;
-	cursor: pointer;
 }
 
 .login-tab-btn.active {
@@ -146,20 +136,29 @@ body {
 	width: 100%;
 	padding: 10px;
 	border: none;
-	border-radius: 4px;
 	background-color: #1f4e79;
 	color: #ffffff;
+}
+
+.login-btn,
+.panel-close,
+.login-tab-btn,
+.login-submit {
+	border-radius: 4px;
 	cursor: pointer;
+}
+
+
+.login-msg,
+.login-whoami {
+	font-size: 12px;
+	color: #444444;
 }
 
 .login-msg {
 	margin-top: 8px;
-	font-size: 12px;
-	color: #444444;
 }
 
 .login-whoami {
 	margin: 0 0 12px 0;
-	font-size: 12px;
-	color: #444444;
 }
