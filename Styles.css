@@ -102,6 +102,26 @@ body {
 	margin-top: 8px;
 }
 
+.reply-toggle-btn {
+	margin-top: 8px;
+	padding: 6px 10px;
+	border: 1px solid #1f4e79;
+	border-radius: 4px;
+	background-color: transparent;
+	color: #1f4e79;
+	cursor: pointer;
+}
+
+.delete-btn {
+	margin-top: 8px;
+	padding: 6px 10px;
+	border: 1px solid #b42318;
+	border-radius: 4px;
+	background-color: transparent;
+	color: #b42318;
+	cursor: pointer;
+}
+
 .reply-input {
 	flex: 1 1 auto;
 	padding: 8px;

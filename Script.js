@@ -89,6 +89,10 @@ function isStaff() {
 	return currentRole === "it" || currentRole === "admin";
 }
 
+function isAdmin() {
+	return currentRole === "admin";
+}
+
 function updateMessageUI() {
 	if (!currentUser) {
 		show(messageForm, false);
@@ -113,19 +117,31 @@ function renderMessages(messages) {
 	}
 
 	messageList.innerHTML = messages.map((msg) => {
-		const sender = escapeHtml(msg.sender_name || "Bruker");
+		const sender = "Anonym";
 		const content = escapeHtml(msg.content || "");
 		const created = formatTime(msg.created_at);
-		const response = msg.response ? `<div class="msg-response"><strong>Svar:</strong> ${escapeHtml(msg.response)}</div>` : "<div class=\"msg-response\"><strong>Svar:</strong> Ikke besvart ennå.</div>";
+		const responseName = escapeHtml(msg.response_by_name || "IT");
+		const response = msg.response
+			? `<div class="msg-response"><strong>Svar fra ${responseName}:</strong> ${escapeHtml(msg.response)}</div>`
+			: "<div class=\"msg-response\"><strong>Svar:</strong> Ikke besvart ennå.</div>";
 		let reply = "";
+		let adminActions = "";
 
 		if (isStaff()) {
 			const replyValue = escapeHtml(msg.response || "");
+			const toggleLabel = msg.response ? "Edit svar" : "Legg til kommentar";
 			reply = `
-				<div class="reply-row">
+				<button class="reply-toggle-btn" type="button" data-toggle-reply="${msg.id}" data-label="${toggleLabel}">${toggleLabel}</button>
+				<div id="reply-row-${msg.id}" class="reply-row" style="display: none;">
 					<input id="reply-${msg.id}" class="reply-input" type="text" placeholder="Skriv svar..." value="${replyValue}">
 					<button class="reply-btn" type="button" data-reply="${msg.id}">Svar</button>
 				</div>
+			`;
+		}
+
+		if (isAdmin()) {
+			adminActions = `
+				<button class="delete-btn" type="button" data-delete="${msg.id}">Slett</button>
 			`;
 		}
 
@@ -135,6 +151,7 @@ function renderMessages(messages) {
 				<div class="msg-meta">${created}</div>
 				${response}
 				${reply}
+				${adminActions}
 			</div>
 		`;
 	}).join("");
@@ -287,7 +304,7 @@ async function loadMessages() {
 	messageStatus.textContent = "Laster meldinger...";
 	let query = supabase
 		.from("messages")
-		.select("id, user_id, sender_name, content, response, created_at, responded_at")
+		.select("id, user_id, content, response, response_by_name, created_at, responded_at")
 		.order("created_at", { ascending: false })
 		.limit(200);
 
@@ -323,10 +340,8 @@ messageForm.addEventListener("submit", async (event) => {
 		return;
 	}
 
-	const senderName = currentProfile?.username || currentUser.email;
 	const { error } = await supabase.from("messages").insert({
 		user_id: currentUser.id,
-		sender_name: senderName,
 		content: text
 	});
 
@@ -341,6 +356,48 @@ messageForm.addEventListener("submit", async (event) => {
 });
 
 messageList.addEventListener("click", async (event) => {
+	const deleteButton = event.target.closest("[data-delete]");
+	if (deleteButton && isAdmin()) {
+		const messageId = deleteButton.dataset.delete;
+		const ok = window.confirm("Slette denne meldingen?");
+		if (!ok) {
+			return;
+		}
+
+		deleteButton.disabled = true;
+		const { error } = await supabase
+			.from("messages")
+			.delete()
+			.eq("id", messageId);
+		deleteButton.disabled = false;
+
+		if (error) {
+			window.alert("Feil: " + error.message);
+			return;
+		}
+
+		await loadMessages();
+		return;
+	}
+
+	const toggleButton = event.target.closest("[data-toggle-reply]");
+	if (toggleButton && isStaff()) {
+		const messageId = toggleButton.dataset.toggleReply;
+		const row = document.getElementById(`reply-row-${messageId}`);
+		if (row) {
+			const isHidden = row.style.display === "none" || row.style.display === "";
+			row.style.display = isHidden ? "flex" : "none";
+			toggleButton.textContent = isHidden ? "Skjul" : toggleButton.dataset.label;
+			if (isHidden) {
+				const input = document.getElementById(`reply-${messageId}`);
+				if (input) {
+					input.focus();
+				}
+			}
+		}
+		return;
+	}
+
 	const button = event.target.closest("[data-reply]");
 	if (!button || !isStaff()) {
 		return;
@@ -359,9 +416,14 @@ messageList.addEventListener("click", async (event) => {
 	}
 
 	button.disabled = true;
+	const responderName = currentProfile?.username || currentUser.email || "IT";
 	const { error } = await supabase
 		.from("messages")
-		.update({ response: replyText, responded_at: new Date().toISOString() })
+		.update({
+			response: replyText,
+			response_by_name: responderName,
+			responded_at: new Date().toISOString()
+		})
 		.eq("id", messageId);
 	button.disabled = false;
 
