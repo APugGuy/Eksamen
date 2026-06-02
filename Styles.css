@@ -58,6 +58,66 @@ body {
 	margin-top: auto;
 }
 
+.msg-section {
+	margin-top: 16px;
+}
+
+.msg-title {
+	margin: 0 0 8px 0;
+	font-size: 18px;
+}
+
+.msg-status {
+	margin: 0 0 8px 0;
+	font-size: 12px;
+	color: #444444;
+}
+
+.msg-list {
+	display: grid;
+	gap: 8px;
+}
+
+.msg-card {
+	border: 1px solid #e0e0e0;
+	border-radius: 6px;
+	padding: 10px;
+	background-color: #ffffff;
+}
+
+.msg-meta {
+	margin: 4px 0 0 0;
+	font-size: 12px;
+	color: #666666;
+}
+
+.msg-response {
+	margin-top: 6px;
+	font-size: 13px;
+}
+
+.reply-row {
+	display: flex;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.reply-input {
+	flex: 1 1 auto;
+	padding: 8px;
+	border: 1px solid #cccccc;
+	border-radius: 4px;
+}
+
+.reply-btn {
+	padding: 8px 12px;
+	border: none;
+	border-radius: 4px;
+	background-color: #1f4e79;
+	color: #ffffff;
+	cursor: pointer;
+}
+
 .login-panel {
 	position: fixed;
 	top: 0;

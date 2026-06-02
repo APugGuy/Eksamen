@@ -30,8 +30,15 @@ const signupEmail = document.getElementById("signupEmail");
 const signupPassword = document.getElementById("signupPassword");
 const logoutBtn = document.getElementById("logoutBtn");
 
+const messageForm = document.getElementById("messageForm");
+const messageContent = document.getElementById("messageContent");
+const messageList = document.getElementById("messageList");
+const messageStatus = document.getElementById("messageStatus");
+const messageMsg = document.getElementById("messageMsg");
+
 let currentUser = null;
 let currentProfile = null;
+let currentRole = "user";
 
 function setPanelOpen(isOpen) {
 	panel.classList.toggle("open", isOpen);
@@ -49,6 +56,7 @@ function updateUI() {
 		show(loggedIn, false);
 		show(openBtn, true);
 		show(loginDropdown, false);
+		updateMessageUI();
 		return;
 	}
 
@@ -60,6 +68,76 @@ function updateUI() {
 	const displayName = currentProfile?.username || currentUser.email;
 	whoami.textContent = "Innlogget som " + displayName;
 	loginDropdownButton.textContent = displayName;
+	updateMessageUI();
+}
+
+function escapeHtml(value) {
+	return (value || "").replace(/[<>&"']/g, (ch) => ({
+		"<": "&lt;",
+		">": "&gt;",
+		"&": "&amp;",
+		"\"": "&quot;",
+		"'": "&#39;"
+	}[ch]));
+}
+
+function formatTime(value) {
+	return value ? new Date(value).toLocaleString() : "";
+}
+
+function isStaff() {
+	return currentRole === "it" || currentRole === "admin";
+}
+
+function updateMessageUI() {
+	if (!currentUser) {
+		show(messageForm, false);
+		messageStatus.textContent = "Logg inn for å sende melding.";
+		messageList.innerHTML = "";
+		messageMsg.textContent = "";
+		return;
+	}
+
+	show(messageForm, !isStaff());
+	messageStatus.textContent = isStaff()
+		? "Du ser alle meldinger og kan svare."
+		: "Du ser dine meldinger og svar.";
+	messageMsg.textContent = "";
+	loadMessages();
+}
+
+function renderMessages(messages) {
+	if (!messages || messages.length === 0) {
+		messageList.innerHTML = "<div class=\"msg-status\">Ingen meldinger ennå.</div>";
+		return;
+	}
+
+	messageList.innerHTML = messages.map((msg) => {
+		const sender = escapeHtml(msg.sender_name || "Bruker");
+		const content = escapeHtml(msg.content || "");
+		const created = formatTime(msg.created_at);
+		const response = msg.response ? `<div class="msg-response"><strong>Svar:</strong> ${escapeHtml(msg.response)}</div>` : "<div class=\"msg-response\"><strong>Svar:</strong> Ikke besvart ennå.</div>";
+		let reply = "";
+
+		if (isStaff()) {
+			const replyValue = escapeHtml(msg.response || "");
+			reply = `
+				<div class="reply-row">
+					<input id="reply-${msg.id}" class="reply-input" type="text" placeholder="Skriv svar..." value="${replyValue}">
+					<button class="reply-btn" type="button" data-reply="${msg.id}">Svar</button>
+				</div>
+			`;
+		}
+
+		return `
+			<div class="msg-card">
+				<div><strong>${sender}</strong>: ${content}</div>
+				<div class="msg-meta">${created}</div>
+				${response}
+				${reply}
+			</div>
+		`;
+	}).join("");
 }
 
 async function refreshAuthUI() {
@@ -76,12 +154,13 @@ async function refreshAuthUI() {
 	currentUser = user;
 	const { data } = await supabase
 		.from("users")
-		.select("id, username, email, auth_user_id")
+		.select("id, username, email, auth_user_id, role")
 		.eq("auth_user_id", user.id)
 		.maybeSingle();
 	console.log("[auth] profile", data ? "loaded" : "missing");
 
 	currentProfile = data || null;
+	currentRole = currentProfile?.role || "user";
 	updateUI();
 }
 
@@ -154,7 +233,7 @@ changeUsernameBtn.addEventListener("click", async (event) => {
 		.from("users")
 		.update({ username: newName.trim() })
 		.eq("auth_user_id", currentUser.id)
-		.select("id, username, email, auth_user_id")
+		.select("id, username, email, auth_user_id, role")
 		.maybeSingle();
 
 	if (error || !data) {
@@ -163,6 +242,7 @@ changeUsernameBtn.addEventListener("click", async (event) => {
 	}
 
 	currentProfile = data;
+	currentRole = currentProfile?.role || "user";
 	updateUI();
 });
 
@@ -197,6 +277,100 @@ signupForm.addEventListener("submit", async (event) => {
 	}
 
 	signupMsg.textContent = "Konto opprettet. Sjekk e-posten din.";
+});
+
+async function loadMessages() {
+	if (!currentUser) {
+		return;
+	}
+
+	messageStatus.textContent = "Laster meldinger...";
+	let query = supabase
+		.from("messages")
+		.select("id, user_id, sender_name, content, response, created_at, responded_at")
+		.order("created_at", { ascending: false })
+		.limit(200);
+
+	if (!isStaff()) {
+		query = query.eq("user_id", currentUser.id);
+	}
+
+	const { data, error } = await query;
+	if (error) {
+		messageStatus.textContent = "Feil: " + error.message;
+		return;
+	}
+
+	messageStatus.textContent = isStaff()
+		? "Du ser alle meldinger og kan svare."
+		: "Du ser dine meldinger og svar.";
+
+	renderMessages(data || []);
+}
+
+messageForm.addEventListener("submit", async (event) => {
+	event.preventDefault();
+	messageMsg.textContent = "Sender...";
+
+	if (!currentUser) {
+		messageMsg.textContent = "Du må være innlogget.";
+		return;
+	}
+
+	const text = messageContent.value.trim();
+	if (!text) {
+		messageMsg.textContent = "Skriv en melding.";
+		return;
+	}
+
+	const senderName = currentProfile?.username || currentUser.email;
+	const { error } = await supabase.from("messages").insert({
+		user_id: currentUser.id,
+		sender_name: senderName,
+		content: text
+	});
+
+	if (error) {
+		messageMsg.textContent = "Feil: " + error.message;
+		return;
+	}
+
+	messageContent.value = "";
+	messageMsg.textContent = "Sendt.";
+	await loadMessages();
+});
+
+messageList.addEventListener("click", async (event) => {
+	const button = event.target.closest("[data-reply]");
+	if (!button || !isStaff()) {
+		return;
+	}
+
+	const messageId = button.dataset.reply;
+	const input = document.getElementById(`reply-${messageId}`);
+	if (!input) {
+		return;
+	}
+
+	const replyText = input.value.trim();
+	if (!replyText) {
+		window.alert("Skriv et svar først.");
+		return;
+	}
+
+	button.disabled = true;
+	const { error } = await supabase
+		.from("messages")
+		.update({ response: replyText, responded_at: new Date().toISOString() })
+		.eq("id", messageId);
+	button.disabled = false;
+
+	if (error) {
+		window.alert("Feil: " + error.message);
+		return;
+	}
+
+	await loadMessages();
 });
 
 supabase.auth.onAuthStateChange((event, session) => {

@@ -28,6 +28,20 @@
 
     <main class="site-main">
         <p>Dette er en veldig enkel side med header og footer.</p>
+
+        <section class="msg-section">
+            <h2 class="msg-title">Meldinger</h2>
+            <p id="messageStatus" class="msg-status">Logg inn for å sende melding.</p>
+
+            <form id="messageForm" class="msg-form" style="display: none;">
+                <label class="field-label" for="messageContent">Melding</label>
+                <textarea id="messageContent" class="field-input" rows="3" required></textarea>
+                <button id="messageSendBtn" class="login-submit" type="submit">Send melding</button>
+                <div id="messageMsg" class="login-msg"></div>
+            </form>
+
+            <div id="messageList" class="msg-list"></div>
+        </section>
     </main>
 
     <footer class="site-footer">
