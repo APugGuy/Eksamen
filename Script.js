@@ -4,6 +4,8 @@ const supabaseUrl = "https://qrvaswhgvaxjngwslhcv.supabase.co";
 const supabaseKey = "sb_publishable_ao9SQOcidOGAiCG8dl8O8w_bdQcR_Oy";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+//------------------vise koblingen på console----------------------
+
 const panel = document.getElementById("loginPanel");
 const openBtn = document.getElementById("loginOpenBtn");
 const closeBtn = document.getElementById("loginCloseBtn");
@@ -19,7 +21,9 @@ const loginForm = document.getElementById("loginForm");
 const signupForm = document.getElementById("signupForm");
 const loginMsg = document.getElementById("loginMsg");
 const signupMsg = document.getElementById("signupMsg");
+
 const loginEmail = document.getElementById("loginEmail");
+
 const loginPassword = document.getElementById("loginPassword");
 const signupUsername = document.getElementById("signupUsername");
 const signupEmail = document.getElementById("signupEmail");
@@ -37,6 +41,7 @@ function setPanelOpen(isOpen) {
 function show(el, isVisible) {
 	el.style.display = isVisible ? "" : "none";
 }
+//-----------? : if else ---------------------------
 
 function updateUI() {
 	if (!currentUser) {
