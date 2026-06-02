@@ -130,7 +130,7 @@ function renderMessages(messages) {
 
 		if (isStaff()) {
 			const replyValue = escapeHtml(msg.response || "");
-			const toggleLabel = msg.response ? "Edit svar" : "Legg til kommentar";
+			const toggleLabel = msg.response ? "Rediger svar" : "Legg til kommentar";
 			reply = `
 				<button class="reply-toggle-btn" type="button" data-toggle-reply="${msg.id}" data-label="${toggleLabel}">${toggleLabel}</button>
 				<div id="reply-row-${msg.id}" class="reply-row" style="display: none;">
@@ -158,6 +158,8 @@ function renderMessages(messages) {
 	}).join("");
 }
 
+//-----------------------------async/await--------------------------------------------------
+
 async function refreshAuthUI() {
 	const { data: { user } } = await supabase.auth.getUser();
 	console.log("[auth] getUser", user ? "signed in" : "signed out");
@@ -181,6 +183,8 @@ async function refreshAuthUI() {
 	currentRole = currentProfile?.role || "user";
 	updateUI();
 }
+
+//-----------------------------addEventListener--------------------------------------------------
 
 openBtn.addEventListener("click", () => setPanelOpen(true));
 closeBtn.addEventListener("click", () => setPanelOpen(false));
