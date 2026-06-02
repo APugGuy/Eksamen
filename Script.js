@@ -370,6 +370,7 @@ messageList.addEventListener("click", async (event) => {
 		return;
 	}
 
+	input.value = "";
 	await loadMessages();
 });
 
