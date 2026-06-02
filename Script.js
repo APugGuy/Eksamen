@@ -23,6 +23,7 @@ const loginMsg = document.getElementById("loginMsg");
 const signupMsg = document.getElementById("signupMsg");
 
 const loginEmail = document.getElementById("loginEmail");
+//-----------------getElementById-------------------------
 
 const loginPassword = document.getElementById("loginPassword");
 const signupUsername = document.getElementById("signupUsername");
@@ -48,7 +49,7 @@ function setPanelOpen(isOpen) {
 function show(el, isVisible) {
 	el.style.display = isVisible ? "" : "none";
 }
-//-----------? : if else ---------------------------
+//-----------? : if else --------------------------- og function----------
 
 function updateUI() {
 	if (!currentUser) {
